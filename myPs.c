@@ -7,6 +7,16 @@
 
 const char *psName = "comm";
 
+int reallocPs(proc** ps, int index) {
+    proc* tmp = *ps;
+    tmp = realloc(tmp, (index + 1) * sizeof(proc));
+    if (!tmp) {
+        return -1;
+    }
+    memset(&tmp[index], 0, sizeof(proc));
+    *ps = tmp;
+    return 0;
+}
 
 int isCorrectDirectory(char *path, char *name) {
     struct stat st;
@@ -14,35 +24,13 @@ int isCorrectDirectory(char *path, char *name) {
     if (res != 0) 
         return 0;
     if (S_ISDIR(st.st_mode)) {
-    char *end;
-    strtol(name, &end, 10);
+        char *end;
+        strtol(name, &end, 10);
         if (*end == '\0') {           
             return 1;
         }
     }
         return 0;
-}
-
-int countDirs()
-{
-    DIR *dir = opendir("/proc");
-    char path[256];
-    if (!dir)
-    {
-        perror("Failed to open directory");
-        return -1;
-    }
-    struct dirent *entry;
-    int count = 0;
-    while ((entry = readdir(dir)) != NULL)
-    {
-        snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
-        if(isCorrectDirectory(path, entry->d_name)) {
-            count++;
-        }
-    }
-    closedir(dir);
-    return count;
 }
 
 void getProcName(const char* pid, proc* ps) {
@@ -63,7 +51,7 @@ void getProcName(const char* pid, proc* ps) {
     fclose(psName);
 }
 
-int getAvaliableProcs(proc **ps, int count) {
+int getAvaliableProcs(proc **ps, int* index) {
     DIR *dir = opendir("/proc");
 
     if (!dir) {
@@ -71,41 +59,32 @@ int getAvaliableProcs(proc **ps, int count) {
         return -1;
     }
 
-    *ps = (malloc(count*sizeof(proc)));
-    if(!*ps){
-        perror("Memory was not allocated...");
-        closedir(dir);
-        return -2;
-    }
-    memset(*ps, 0, count * sizeof(proc));
-
     struct dirent *entry;
-    int index = 0;
+    *index = 0;
     while ((entry = readdir(dir)) != NULL) {
         char path[256];
         snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
-        if(!isCorrectDirectory(path,entry->d_name)){
+        if(!isCorrectDirectory(path, entry->d_name)){
             continue;
         }
-        getProcName(entry->d_name, &((*ps)[index]));
-        snprintf((*ps)[index].pid, sizeof((*ps)[index].pid), "%s", entry->d_name);
-        index++;
-        if(index == count) {
-            break;
+        int res = reallocPs(ps, *index);
+        if(res != 0) {
+            perror("boo boo with memory...");
+            closedir(dir);
+            return -2;
         }
+        getProcName(entry->d_name, &((*ps)[*index]));
+        snprintf((*ps)[*index].pid, sizeof((*ps)[*index].pid), "%s", entry->d_name);
+        (*index)++;
     }
     closedir(dir);
     return 0;
 }
 
 int main(int argc, char **argv) {
-    proc *ps;
-    int count = countDirs();
-    if(count < 0) {
-        perror("Something went wrong...");
-        return -1;
-    }
-    int res = getAvaliableProcs(&ps, count);
+    proc *ps = NULL;
+    int count;
+    int res = getAvaliableProcs(&ps, &count);
     if(res != 0) {
         perror("something wrong...");
         return res;
