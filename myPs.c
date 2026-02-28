@@ -23,9 +23,6 @@ int cmpByPid(const void *a, const void *b) {
 }
 
 void sort(proc** ps, int length) {
-    if(!(fl & sortByName) && !(fl & sortByPid)) {
-        return;
-    }
     if((fl & sortByName)) {
         qsort(*ps, length, sizeof(proc), cmpByName);
     }
@@ -64,7 +61,7 @@ int isCorrectDirectory(char *path, char *name) {
 void getProcName(const char* pid, proc* ps) {
     char comm[256] = "";
     char path[64];
-    snprintf(path, sizeof(path), "/proc/%s/comm", pid);
+    snprintf(path, sizeof(path), "/proc/%s/%s", pid, psName);
     FILE* psName = fopen(path, "r");
     if(psName == NULL) {
         return;
