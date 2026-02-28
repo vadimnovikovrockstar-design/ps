@@ -5,10 +5,15 @@
 #define sortByName 0x02
 #define stringCount 0x04
 
+typedef struct {
+    long VmRSS;
+    long VmSize;
+} mem;
 
 typedef struct {
     char name[256];
     int pid;
+    mem memory;
 } proc;
 
 

@@ -152,7 +152,7 @@ int getAvaliableProcs(proc **ps, int* index) {
 void parseArgs(int argc, char **argv) {
     int opt;
 
-    while ((opt = getopt(argc, argv, "npN:")) != -1) {
+    while ((opt = getopt(argc, argv, "sSrRnpN:")) != -1) {
         switch (opt) {
         case 'n':
             fl |= sortByName;
@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
     getAvaliableProcs(&ps, &count);
     printf("%-20s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)");
     for(int i = 0; i<count; ++i){
-        printf("%-20.20s %10d %10ldK %10ldK\n", ps[i].name, ps[i].pid, ps[i].memory.VmRSS, ps[i].memory.VmSize);
+        printf("%-20.20s %10d %10ld %10ld\n", ps[i].name, ps[i].pid, ps[i].memory.VmRSS, ps[i].memory.VmSize);
     }
     free(ps);
     return 0;
