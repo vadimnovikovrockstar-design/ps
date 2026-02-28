@@ -3,9 +3,36 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 #include "myPs.h"
 
 const char *psName = "comm";
+int fl = 0;
+
+int cmpByName(const void *a, const void *b) {
+    const proc *pa = a;
+    const proc *pb = b;
+    return strcmp(pa->name, pb->name);
+}
+
+int cmpByPid(const void *a, const void *b) {
+    const proc *pa = a;
+    const proc *pb = b;
+    return pa->pid - pb->pid;
+}
+
+void sort(proc** ps, int length) {
+    if(!(fl & sortByName) && !(fl & sortByPid)) {
+        return;
+    }
+    if((fl & sortByName)) {
+        qsort(*ps, length, sizeof(proc), cmpByName);
+    }
+    
+    if((fl & sortByPid)) {
+        qsort(*ps, length, sizeof(proc), cmpByPid);
+    }
+}
 
 int reallocPs(proc** ps, int index) {
     proc* tmp = *ps;
@@ -74,15 +101,40 @@ int getAvaliableProcs(proc **ps, int* index) {
             return -2;
         }
         getProcName(entry->d_name, &((*ps)[*index]));
-        snprintf((*ps)[*index].pid, sizeof((*ps)[*index].pid), "%s", entry->d_name);
+        (*ps)[*index].pid = atoi(entry->d_name);
         (*index)++;
     }
     closedir(dir);
+    sort(ps, *index);
     return 0;
 }
 
+void parseArgs(int argc, char **argv) {
+    int opt;
+
+    while ((opt = getopt(argc, argv, "np")) != -1) {
+        switch (opt) {
+        case 'n':
+            fl |= sortByName;
+            break;
+        case 'p':
+            fl |= sortByPid;
+            break;
+        default:
+            perror("Bad command line args");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if ((fl & sortByName) && (fl & sortByPid)) {
+        perror("Bad sorting arguments");
+        exit(EXIT_FAILURE);
+    }
+}
+
 int main(int argc, char **argv) {
-    proc *ps = NULL;
+    parseArgs(argc, argv);
+    proc *ps = NULL;    
     int count;
     int res = getAvaliableProcs(&ps, &count);
     if(res != 0) {
@@ -90,7 +142,7 @@ int main(int argc, char **argv) {
         return res;
     }
     for(int i = 0; i<count; ++i){
-        printf("%-20.20s %10.10s\n", ps[i].name, ps[i].pid);
+        printf("%-20.20s %10d\n", ps[i].name, ps[i].pid);
     }
     free(ps);
     return 0;
