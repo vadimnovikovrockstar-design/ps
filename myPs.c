@@ -5,10 +5,12 @@
 #include <string.h>
 #include <getopt.h>
 #include <err.h>
+#include <errno.h>
 #include "myPs.h"
 
 const char *psName = "comm";
 static int fl = 0;
+static long strCount = 0;
 
 int cmpByName(const void *a, const void *b) {
     const proc *pa = a;
@@ -62,17 +64,17 @@ void getProcName(const char* pid, proc* ps) {
     char comm[256] = "";
     char path[64];
     snprintf(path, sizeof(path), "/proc/%s/%s", pid, psName);
-    FILE* psName = fopen(path, "r");
-    if(psName == NULL) {
+    FILE* psFile = fopen(path, "r");
+    if(psFile == NULL) {
         return;
     }
-    if (!fgets(comm, sizeof(comm), psName)) {
-        fclose(psName);
+    if (!fgets(comm, sizeof(comm), psFile)) {
+        fclose(psFile);
         return;
     }
     comm[strcspn(comm, "\n")] = 0;
     snprintf(ps->name, sizeof(ps->name), "%s", comm);
-    fclose(psName);
+    fclose(psFile);
 }
 
 int getAvaliableProcs(proc **ps, int* index) {
@@ -98,6 +100,11 @@ int getAvaliableProcs(proc **ps, int* index) {
         getProcName(entry->d_name, &((*ps)[*index]));
         (*ps)[*index].pid = atoi(entry->d_name);
         (*index)++;
+        if(fl & stringCount) {
+            if(strCount == *index) {
+                break;
+            }
+        }
     }
     closedir(dir);
     sort(ps, *index);
@@ -107,7 +114,7 @@ int getAvaliableProcs(proc **ps, int* index) {
 void parseArgs(int argc, char **argv) {
     int opt;
 
-    while ((opt = getopt(argc, argv, "np")) != -1) {
+    while ((opt = getopt(argc, argv, "npN:")) != -1) {
         switch (opt) {
         case 'n':
             fl |= sortByName;
@@ -115,11 +122,22 @@ void parseArgs(int argc, char **argv) {
         case 'p':
             fl |= sortByPid;
             break;
+        case 'N':
+            errno = 0;
+            fl |= stringCount;
+            char *end;
+            strCount = strtol(optarg, &end, 10);
+            if (errno == ERANGE) {
+                errx(2, "Number out of range");
+            }
+            if (*end != '\0' || strCount <=0) {
+                errx(2, "Bad command line args");
+            }
+            break;
         default:
             errx(2, "Bad command line args");
         }
     }
-
     if ((fl & sortByName) && (fl & sortByPid)) {
         errx(2, "Bad sorting arguments");
     }

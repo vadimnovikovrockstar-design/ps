@@ -1,10 +1,9 @@
 #ifndef MY_PS_H
 #define MY_PS_H
 
-#define flags 0
 #define sortByPid 0x01
 #define sortByName 0x02
-
+#define stringCount 0x04
 
 
 typedef struct {
