@@ -4,10 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <err.h>
 #include "myPs.h"
 
 const char *psName = "comm";
-int fl = 0;
+static int fl = 0;
 
 int cmpByName(const void *a, const void *b) {
     const proc *pa = a;
@@ -18,7 +19,7 @@ int cmpByName(const void *a, const void *b) {
 int cmpByPid(const void *a, const void *b) {
     const proc *pa = a;
     const proc *pb = b;
-    return pa->pid - pb->pid;
+    return (pa->pid > pb->pid) - (pa->pid < pb->pid);
 }
 
 void sort(proc** ps, int length) {
@@ -66,7 +67,6 @@ void getProcName(const char* pid, proc* ps) {
     snprintf(path, sizeof(path), "/proc/%s/comm", pid);
     FILE* psName = fopen(path, "r");
     if(psName == NULL) {
-        perror("Failed to open process file");
         return;
     }
     if (!fgets(comm, sizeof(comm), psName)) {
@@ -82,23 +82,21 @@ int getAvaliableProcs(proc **ps, int* index) {
     DIR *dir = opendir("/proc");
 
     if (!dir) {
-        perror("Failed to open directory");
-        return -1;
+        err(1, "Failed to open directory");
     }
 
     struct dirent *entry;
     *index = 0;
     while ((entry = readdir(dir)) != NULL) {
-        char path[256];
+        char path[512];
         snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
         if(!isCorrectDirectory(path, entry->d_name)){
             continue;
         }
         int res = reallocPs(ps, *index);
         if(res != 0) {
-            perror("boo boo with memory...");
             closedir(dir);
-            return -2;
+            err(1, "Memory allocation failed");
         }
         getProcName(entry->d_name, &((*ps)[*index]));
         (*ps)[*index].pid = atoi(entry->d_name);
@@ -121,14 +119,12 @@ void parseArgs(int argc, char **argv) {
             fl |= sortByPid;
             break;
         default:
-            perror("Bad command line args");
-            exit(EXIT_FAILURE);
+            errx(2, "Bad command line args");
         }
     }
 
     if ((fl & sortByName) && (fl & sortByPid)) {
-        perror("Bad sorting arguments");
-        exit(EXIT_FAILURE);
+        errx(2, "Bad sorting arguments");
     }
 }
 
@@ -136,11 +132,7 @@ int main(int argc, char **argv) {
     parseArgs(argc, argv);
     proc *ps = NULL;    
     int count;
-    int res = getAvaliableProcs(&ps, &count);
-    if(res != 0) {
-        perror("something wrong...");
-        return res;
-    }
+    getAvaliableProcs(&ps, &count);
     for(int i = 0; i<count; ++i){
         printf("%-20.20s %10d\n", ps[i].name, ps[i].pid);
     }
