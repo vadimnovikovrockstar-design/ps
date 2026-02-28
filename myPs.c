@@ -25,6 +25,9 @@ int cmpByPid(const void *a, const void *b) {
 }
 
 void sort(proc** ps, int length) {
+    if(!(fl & sortByName) && !(fl & sortByPid)) {
+        return;
+    }
     if((fl & sortByName)) {
         qsort(*ps, length, sizeof(proc), cmpByName);
     }
