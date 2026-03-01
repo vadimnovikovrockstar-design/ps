@@ -21,7 +21,7 @@ int reallocPs(proc** ps, int index);
 void sort(proc** ps, int length);
 
 
-int getAvaliableProcs(proc **ps, int* index) {
+int getAvaliableProcs(proc **ps, int* index, options* opt) {
     DIR *dir = opendir("/proc");
 
     if (!dir) {
@@ -51,8 +51,8 @@ int getAvaliableProcs(proc **ps, int* index) {
         }
         (*index)++;
 
-        if(opt.flags & STRING_RESTRICTION) {
-            if(opt.limits == *index) {
+        if(opt->flags & STRING_RESTRICTION) {
+            if(opt->limits == *index) {
                 break;
             }
         }

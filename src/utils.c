@@ -40,29 +40,29 @@ int cmpByVmSizeDown(const void *a, const void *b) {
     return (pa->memory.VmSize < pb->memory.VmSize) - (pa->memory.VmSize > pb->memory.VmSize);
 }
 
-void sort(proc** ps, int length) {
+void sort(proc** ps, int length, options* opt) {
     
-    if(opt.sortMode == SORT_BY_NAME) {
+    if(opt->sortMode == SORT_BY_NAME) {
         qsort(*ps, length, sizeof(proc), cmpByName);
     }
     
-    if(opt.sortMode == SORT_BY_PID) {
+    if(opt->sortMode == SORT_BY_PID) {
         qsort(*ps, length, sizeof(proc), cmpByPid);
     }
 
-    if(opt.sortMode == SORT_UP_BY_VM_RSS) {
+    if(opt->sortMode == SORT_UP_BY_VM_RSS) {
         qsort(*ps, length, sizeof(proc), cmpByVmRssUp);
     }
 
-    if(opt.sortMode == SORT_DOWN_BY_VM_RSS) {
+    if(opt->sortMode == SORT_DOWN_BY_VM_RSS) {
         qsort(*ps, length, sizeof(proc), cmpByVmRssDown);
     }
 
-    if(opt.sortMode == SORT_UP_BY_VM_SIZE) {
+    if(opt->sortMode == SORT_UP_BY_VM_SIZE) {
         qsort(*ps, length, sizeof(proc), cmpByVmSizeUp);
     }
 
-    if(opt.sortMode == SORT_DOWN_BY_VM_SIZE) {
+    if(opt->sortMode == SORT_DOWN_BY_VM_SIZE) {
         qsort(*ps, length, sizeof(proc), cmpByVmSizeDown);
     }
 

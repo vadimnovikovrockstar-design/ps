@@ -21,6 +21,15 @@ $(BUILD)/%.o: $(SRC_DIR)/%.c | $(BUILD)
 $(BUILD):
 	mkdir -p $(BUILD)
 
+ARCHIVE = $(BUILD)/project.tar.gz
+ARCHIVE_SRC = $(wildcard src/*.c headers/*.h) Makefile
+
+$(ARCHIVE): $(ARCHIVE_SRC)
+	tar czf $(ARCHIVE) src headers Makefile
+	@echo "Archive updated"
+
+archive: $(ARCHIVE)
+
 clean:
 	rm -rf $(BUILD)
 
