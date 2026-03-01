@@ -11,12 +11,14 @@
 
 const char *psName = "comm";
 const char *status = "status";
+const char *memInfo = "meminfo";
 int fl = 0;
 long strCount = 0;
 
 int isCorrectDirectory(char *path, char *name);
 int getProcMemoryData(int pid, mem* memory);
 void getProcName(const char* pid, proc* ps);
+void getAvaliableMemoryData(proc *pl);
 int reallocPs(procList *pl);
 void sort(procList* pl, options* opt);
 
@@ -49,6 +51,9 @@ int getAvaliableProcs(procList *pl, options* opt) {
         if(res == 0) {
             pl->ps[pl->size].memory = memory;
         }
+
+        getAvaliableMemoryData(&(pl->ps[pl->size]));
+
         pl->size++;
 
         if(opt->flags & STRING_RESTRICTION && opt->sortMode == NOT_SORTED) {
@@ -85,24 +90,54 @@ void getProcName(const char* pid, proc* ps) {
     fclose(psFile);
 }
 
+void getAvaliableMemoryData(proc *ps) {
+    char path[256];
+    snprintf(path, sizeof(path), "/proc/%s", memInfo);
+    char line[128];
+    long totalMemory = 0;
+    FILE* memInfoFile = fopen(path, "r");
+    if(!memInfoFile) {
+        return;         
+    }
+    while(fgets(line, sizeof(line), memInfoFile)) {
+        if(sscanf(line, "MemTotal: %ld", &totalMemory) == 1 ) {
+            break;
+        }
+    }
+    printf("total memory: %ld %ld\n", totalMemory, ps->memory.VmRSS);
+    ps->memoryPercent = totalMemory > 0 ? (ps->memory.VmRSS * 100.) / totalMemory : 0;
+    printf("percent: %lf\n", ps->memoryPercent);
+    fclose(memInfoFile);
+}
+
 int getProcMemoryData(int pid, mem* memory){
     char path[256];
     snprintf(path, sizeof(path), "/proc/%d/%s", pid, status);
     char line[128];
-    long VmRSS = 0;
-    long VmSize = 0;
+    long VmRSS = -1;
+    long VmSize = -1;
     FILE* statusFile = fopen(path, "r");
     if(!statusFile) {
         return -1;
     }
 
     while(fgets(line, sizeof(line), statusFile)) {
+        if(VmRSS > 0 && VmSize > 0) {
+            break;
+        }
         if(sscanf(line, "VmRSS: %ld", &VmRSS) == 1 ) {
             continue;
         }
         if(sscanf(line, "VmSize: %ld", &VmSize) == 1 ) {
             continue;
         }
+    }
+    if(VmRSS == -1) {
+        VmRSS = 0;
+    }
+
+    if(VmSize == -1) {
+        VmSize = 0;
     }
 
     memory->VmRSS = VmRSS;

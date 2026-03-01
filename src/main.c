@@ -13,7 +13,7 @@ void sortAvailableProcs(procList* pl, options* opt);
 void parseArgs(int argc, char **argv, options* opt) {
     int args;
 
-    while ((args = getopt(argc, argv, "sSrRnpN:")) != -1) {
+    while ((args = getopt(argc, argv, "tTsSrRnpN:")) != -1) {
         switch (args) {
         case 'n':
             opt->sortMode = SORT_BY_NAME;
@@ -45,6 +45,12 @@ void parseArgs(int argc, char **argv, options* opt) {
         case 'R':
             opt->sortMode = SORT_DOWN_BY_VM_SIZE;
             break;
+        case 't':
+            opt->sortMode = SORT_UP_BY_MEMORY_PERCENT;
+            break;
+        case 'T':
+            opt->sortMode = SORT_DOWN_BY_MEMORY_PERCENT;
+            break;
         default:
             errx(2, "Bad command line args");
         }
@@ -61,9 +67,9 @@ int main(int argc, char **argv) {
     if(opt.flags & STRING_RESTRICTION) {
         outputLimit = opt.limits < psList.size ? opt.limits : psList.size;
     } 
-    printf("%-20s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)");
+    printf("%-20s %10s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)", "% of total");
     for(int i = 0; i<outputLimit; ++i){
-        printf("%-20.20s %10d %10ld %10ld\n", psList.ps[i].name, psList.ps[i].pid, psList.ps[i].memory.VmRSS, psList.ps[i].memory.VmSize);
+        printf("%-20.20s %10d %10ld %10ld %10lf\n", psList.ps[i].name, psList.ps[i].pid, psList.ps[i].memory.VmRSS, psList.ps[i].memory.VmSize, psList.ps[i].memoryPercent);
     }
     free(psList.ps);
     return 0;

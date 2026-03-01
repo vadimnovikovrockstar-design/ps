@@ -41,6 +41,18 @@ int cmpByVmSizeDown(const void *a, const void *b) {
     return (pa->memory.VmSize < pb->memory.VmSize) - (pa->memory.VmSize > pb->memory.VmSize);
 }
 
+int cmpByMemoryPercentUp(const void *a, const void *b) {
+    const proc *pa = a;
+    const proc *pb = b;
+    return (pa->memoryPercent > pb->memoryPercent) - (pa->memoryPercent < pb->memoryPercent);
+}
+
+int cmpByMemoryPercentDown(const void *a, const void *b) {
+    const proc *pa = a;
+    const proc *pb = b;
+    return (pa->memoryPercent < pb->memoryPercent) - (pa->memoryPercent > pb->memoryPercent);
+}
+
 void sort(procList* pl, options* opt) {
     if(opt->sortMode == SORT_BY_NAME) {
         qsort(pl->ps, pl->size, sizeof(proc), cmpByName);
@@ -64,6 +76,14 @@ void sort(procList* pl, options* opt) {
 
     if(opt->sortMode == SORT_DOWN_BY_VM_SIZE) {
         qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeDown);
+    }
+
+    if(opt->sortMode == SORT_UP_BY_MEMORY_PERCENT) {
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentUp);
+    }
+
+    if(opt->sortMode == SORT_DOWN_BY_MEMORY_PERCENT) {
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentDown);
     }
 
 }
