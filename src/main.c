@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include "ps.h"
 #include "globals.h"
 
@@ -58,6 +59,7 @@ void parseArgs(int argc, char **argv, options* opt) {
 }
 
 int main(int argc, char **argv) {
+    setlocale(LC_ALL, "");
     options opt = {.sortMode = NOT_SORTED, .flags = 0, .limits = 0};
     procList psList = {.ps = NULL, .capacity = 0, .size = 0};
     parseArgs(argc, argv, &opt);

@@ -8,7 +8,7 @@
 int cmpByName(const void *a, const void *b) {
     const proc *pa = a;
     const proc *pb = b;
-    return strcmp(pa->name, pb->name);
+    return strcoll(pa->name, pb->name);
 }
 
 int cmpByPid(const void *a, const void *b) {
@@ -54,38 +54,35 @@ int cmpByMemoryPercentDown(const void *a, const void *b) {
 }
 
 void sort(procList* pl, options* opt) {
-    if(opt->sortMode == SORT_BY_NAME) {
+    switch (opt->sortMode) {
+    case SORT_BY_NAME:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByName);
-    }
-    
-    if(opt->sortMode == SORT_BY_PID) {
+        break;
+    case SORT_BY_PID:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByPid);
-    }
-
-    if(opt->sortMode == SORT_UP_BY_VM_RSS) {
+        break;
+    case SORT_UP_BY_VM_RSS:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssUp);
-    }
-
-    if(opt->sortMode == SORT_DOWN_BY_VM_RSS) {
+        break;
+    case SORT_DOWN_BY_VM_RSS:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssDown);
-    }
-
-    if(opt->sortMode == SORT_UP_BY_VM_SIZE) {
+        break;
+    case SORT_UP_BY_VM_SIZE:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeUp);
-    }
-
-    if(opt->sortMode == SORT_DOWN_BY_VM_SIZE) {
+        break;
+    case SORT_DOWN_BY_VM_SIZE:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeDown);
-    }
-
-    if(opt->sortMode == SORT_UP_BY_MEMORY_PERCENT) {
+        break;
+    case SORT_UP_BY_MEMORY_PERCENT:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentUp);
-    }
-
-    if(opt->sortMode == SORT_DOWN_BY_MEMORY_PERCENT) {
+        break;
+    case SORT_DOWN_BY_MEMORY_PERCENT:
         qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentDown);
+        break;
+    case NOT_SORTED:
+    default:
+        break;
     }
-
 }
 
 int reallocPs(procList *pl) {
