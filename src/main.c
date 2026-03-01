@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     } 
     printf("%-20s %10s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)", "% of total");
     for(int i = 0; i<outputLimit; ++i){
-        printf("%-20.20s %10d %10ld %10ld %10f\n", psList.ps[i].name, psList.ps[i].pid, psList.ps[i].memory.VmRSS, psList.ps[i].memory.VmSize, psList.ps[i].memoryPercent);
+        printf("%-20.20s %10d %10ld %10ld %10.1f%%\n", psList.ps[i].name, psList.ps[i].pid, psList.ps[i].memory.VmRSS, psList.ps[i].memory.VmSize, psList.ps[i].memoryPercent);
     }
     free(psList.ps);
     return 0;
