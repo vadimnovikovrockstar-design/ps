@@ -3,28 +3,25 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
-#include <getopt.h>
 #include <err.h>
-#include <errno.h>
 #include "ps.h"
-#include "globals.h"
 
-const char *psName = "comm";
-const char *status = "status";
-const char *memInfo = "/proc/meminfo";
-int fl = 0;
-long strCount = 0;
-
-int isCorrectDirectory(char *path, char *name);
-int getProcMemoryData(int pid, mem* memory);
-void getProcName(const char* pid, proc* ps);
-long getTotalMemory();
 int reallocPs(procList *pl);
 void sort(procList* pl, options* opt);
 
+static const char *procDir = "/proc";
+static const char *psName = "comm";
+static const char *status = "status";
+static const char *memInfo = "/proc/meminfo";
+
+static int isCorrectDirectory(char *path, char *name);
+static int getProcMemoryData(int pid, mem* memory);
+static void getProcName(proc* ps);
+static long getTotalMemory();
+
 
 int getAvailableProcs(procList *pl, options* opt) {
-    DIR *dir = opendir("/proc");
+    DIR *dir = opendir(procDir);
 
     if (!dir) {
         err(1, "Failed to open directory");
@@ -35,7 +32,7 @@ int getAvailableProcs(procList *pl, options* opt) {
     long totalMemory = getTotalMemory();
     while ((entry = readdir(dir)) != NULL) {
         char path[512];
-        snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
+        snprintf(path, sizeof(path), "%s/%s", procDir, entry->d_name);
         if(!isCorrectDirectory(path, entry->d_name)){
             continue;
         }
@@ -45,8 +42,8 @@ int getAvailableProcs(procList *pl, options* opt) {
             err(1, "Memory allocation failed");
         }
         
-        getProcName(entry->d_name, &(pl->ps[pl->size]));
         pl->ps[pl->size].pid = atoi(entry->d_name);
+        getProcName(&(pl->ps[pl->size]));
 
         mem memory = {0};
         //TODO: handle errors from getProcMemoryData
@@ -74,10 +71,10 @@ void sortAvailableProcs(procList* pl, options* opt) {
     sort(pl, opt);
 }
 
-void getProcName(const char* pid, proc* ps) {
+void getProcName(proc* ps) {
     char comm[256] = "";
     char path[64];
-    snprintf(path, sizeof(path), "/proc/%s/%s", pid, psName);
+    snprintf(path, sizeof(path), "%s/%d/%s", procDir, ps->pid, psName);
     FILE* psFile = fopen(path, "r");
     if(psFile == NULL) {
         return;
@@ -109,7 +106,7 @@ long getTotalMemory() {
 
 int getProcMemoryData(int pid, mem* memory){
     char path[256];
-    snprintf(path, sizeof(path), "/proc/%d/%s", pid, status);
+    snprintf(path, sizeof(path), "%s/%d/%s", procDir, pid, status);
     char line[128];
     long VmRSS = -1;
     long VmSize = -1;

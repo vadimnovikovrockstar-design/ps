@@ -1,12 +1,10 @@
 #include <getopt.h>
 #include <err.h>
 #include <errno.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
 #include "ps.h"
-#include "globals.h"
 
 int getAvailableProcs(procList *pl, options* opt);
 void sortAvailableProcs(procList* pl, options* opt);
@@ -69,7 +67,7 @@ int main(int argc, char **argv) {
     if(opt.flags & STRING_RESTRICTION) {
         outputLimit = opt.limits < psList.size ? opt.limits : psList.size;
     } 
-    printf("%-20s %10s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)", "% of total");
+    printf("%-20s %10s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)", "mem %");
     for(int i = 0; i<outputLimit; ++i){
         printf("%-20.20s %10d %10ld %10ld %10.1f%%\n", psList.ps[i].name, psList.ps[i].pid, psList.ps[i].memory.VmRSS, psList.ps[i].memory.VmSize, psList.ps[i].memoryPercent);
     }

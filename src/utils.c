@@ -1,8 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "ps.h"
-#include "globals.h"
 
 
 int cmpByName(const void *a, const void *b) {
