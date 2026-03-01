@@ -61,7 +61,7 @@ int getAvailableProcs(procList *pl, options* opt) {
 
         pl->size++;
 
-        if(opt->flags & STRING_RESTRICTION && opt->sortMode == NOT_SORTED) {
+        if((opt->flags & STRING_RESTRICTION) && opt->sortMode == NOT_SORTED) {
             if(opt->limits == pl->size) {
                 break;
             }
