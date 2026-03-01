@@ -7,7 +7,7 @@
 #include "ps.h"
 #include "globals.h"
 
-int getAvaliableProcs(proc **ps, int* index, options* opt);
+int getAvaliableProcs(procList *pl, options* opt);
 
 void parseArgs(int argc, char **argv, options* opt) {
     int args;
@@ -52,14 +52,13 @@ void parseArgs(int argc, char **argv, options* opt) {
 
 int main(int argc, char **argv) {
     options opt = {.sortMode = NOT_SORTED, .flags = 0, .limits = 0};
-    proc *ps = NULL;    
-    int count;
+    procList psList = {.ps = NULL, .capacity = 0, .size = 0};
     parseArgs(argc, argv, &opt);
-    getAvaliableProcs(&ps, &count, &opt);
+    getAvaliableProcs(&psList, &opt);
     printf("%-20s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)");
-    for(int i = 0; i<count; ++i){
-        printf("%-20.20s %10d %10ld %10ld\n", ps[i].name, ps[i].pid, ps[i].memory.VmRSS, ps[i].memory.VmSize);
+    for(int i = 0; i<psList.size; ++i){
+        printf("%-20.20s %10d %10ld %10ld\n", psList.ps[i].name, psList.ps[i].pid, psList.ps[i].memory.VmRSS, psList.ps[i].memory.VmSize);
     }
-    free(ps);
+    free(psList.ps);
     return 0;
 }

@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "ps.h"
 #include "globals.h"
 
@@ -40,42 +41,45 @@ int cmpByVmSizeDown(const void *a, const void *b) {
     return (pa->memory.VmSize < pb->memory.VmSize) - (pa->memory.VmSize > pb->memory.VmSize);
 }
 
-void sort(proc** ps, int length, options* opt) {
-    
+void sort(procList* pl, options* opt) {
     if(opt->sortMode == SORT_BY_NAME) {
-        qsort(*ps, length, sizeof(proc), cmpByName);
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByName);
     }
     
     if(opt->sortMode == SORT_BY_PID) {
-        qsort(*ps, length, sizeof(proc), cmpByPid);
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByPid);
     }
 
     if(opt->sortMode == SORT_UP_BY_VM_RSS) {
-        qsort(*ps, length, sizeof(proc), cmpByVmRssUp);
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssUp);
     }
 
     if(opt->sortMode == SORT_DOWN_BY_VM_RSS) {
-        qsort(*ps, length, sizeof(proc), cmpByVmRssDown);
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssDown);
     }
 
     if(opt->sortMode == SORT_UP_BY_VM_SIZE) {
-        qsort(*ps, length, sizeof(proc), cmpByVmSizeUp);
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeUp);
     }
 
     if(opt->sortMode == SORT_DOWN_BY_VM_SIZE) {
-        qsort(*ps, length, sizeof(proc), cmpByVmSizeDown);
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeDown);
     }
 
 }
 
-int reallocPs(proc** ps, int index) {
-    proc* tmp = *ps;
-    tmp = realloc(tmp, (index + 1) * sizeof(proc));
-    if (!tmp) {
-        return -1;
+int reallocPs(procList *pl) {
+    if(pl->size == pl->capacity) {
+        int newCapacity = pl->capacity == 0 ? 1 : pl->capacity * 2;
+        proc* newPs = realloc(pl->ps, newCapacity * sizeof(proc));
+        if(newPs == NULL) {
+            return -1;
+        }
+        memset(newPs + pl->capacity, 0, (newCapacity - pl->capacity) * sizeof(proc));
+        pl->ps = newPs;
+        pl->capacity = newCapacity;
+        return 0;
     }
-    memset(&tmp[index], 0, sizeof(proc));
-    memset(&tmp[index].memory, 0, sizeof(mem));
-    *ps = tmp;
+
     return 0;
 }

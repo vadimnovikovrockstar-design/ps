@@ -33,4 +33,10 @@ typedef struct {
     mem memory;
 } proc;
 
+typedef struct {
+    proc* ps;
+    int capacity;
+    int size;
+} procList;
+
 #endif

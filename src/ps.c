@@ -17,11 +17,11 @@ long strCount = 0;
 int isCorrectDirectory(char *path, char *name);
 int getProcMemoryData(int pid, mem* memory);
 void getProcName(const char* pid, proc* ps);
-int reallocPs(proc** ps, int index);
-void sort(proc** ps, int length);
+int reallocPs(procList *pl);
+void sort(procList* pl, options* opt);
 
 
-int getAvaliableProcs(proc **ps, int* index, options* opt) {
+int getAvaliableProcs(procList *pl, options* opt) {
     DIR *dir = opendir("/proc");
 
     if (!dir) {
@@ -29,36 +29,36 @@ int getAvaliableProcs(proc **ps, int* index, options* opt) {
     }
 
     struct dirent *entry;
-    *index = 0;
+    pl->size = 0;
     while ((entry = readdir(dir)) != NULL) {
         char path[512];
         snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
         if(!isCorrectDirectory(path, entry->d_name)){
             continue;
         }
-        int res = reallocPs(ps, *index);
+        int res = reallocPs(pl);
         if(res != 0) {
             closedir(dir);
             err(1, "Memory allocation failed");
         }
         
-        getProcName(entry->d_name, &((*ps)[*index]));
-        (*ps)[*index].pid = atoi(entry->d_name);
+        getProcName(entry->d_name, &(pl->ps[pl->size]));
+        pl->ps[pl->size].pid = atoi(entry->d_name);
         mem memory;
-        res = getProcMemoryData((*ps)[*index].pid, &memory);
+        res = getProcMemoryData(pl->ps[pl->size].pid, &memory);
         if(res == 0) {
-            (*ps)[*index].memory = memory;
+            pl->ps[pl->size].memory = memory;
         }
-        (*index)++;
+        pl->size++;
 
         if(opt->flags & STRING_RESTRICTION) {
-            if(opt->limits == *index) {
+            if(opt->limits == pl->size) {
                 break;
             }
         }
     }
     closedir(dir);
-    sort(ps, *index);
+    sort(pl, opt);
     return 0;
 }
 
