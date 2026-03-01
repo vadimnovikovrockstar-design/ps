@@ -12,7 +12,6 @@ int getAvailableProcs(procList *pl, options* opt);
 void sortAvailableProcs(procList* pl, options* opt);
 
 void parseArgs(int argc, char **argv, options* opt) {
-    setlocale(LC_CTYPE, "");
     int args;
 
     while ((args = getopt(argc, argv, "tTsSrRnpN:")) != -1) {
@@ -60,6 +59,7 @@ void parseArgs(int argc, char **argv, options* opt) {
 }
 
 int main(int argc, char **argv) {
+    setlocale(LC_ALL, "");
     options opt = {.sortMode = NOT_SORTED, .flags = 0, .limits = 0};
     procList psList = {.ps = NULL, .capacity = 0, .size = 0};
     parseArgs(argc, argv, &opt);

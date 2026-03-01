@@ -1,5 +1,4 @@
 #include <string.h>
-#include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "ps.h"
@@ -55,35 +54,35 @@ int cmpByMemoryPercentDown(const void *a, const void *b) {
 }
 
 void sort(procList* pl, options* opt) {
-    switch(opt->sortMode) {
-        case SORT_BY_NAME:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByName);
-            break;
-        case SORT_BY_PID:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByPid);
-            break;
-        case SORT_UP_BY_VM_RSS:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssUp);
-            break;
-        case SORT_DOWN_BY_VM_RSS:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssDown);
-            break;
-        case SORT_UP_BY_VM_SIZE:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeUp);
-            break;
-        case SORT_DOWN_BY_VM_SIZE:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeDown);
-            break;
-        case SORT_UP_BY_MEMORY_PERCENT:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentUp);
-            break;
-        case SORT_DOWN_BY_MEMORY_PERCENT:
-            qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentDown);
-            break;
-        case NOT_SORTED:
-        default:
-            break;
-        }
+    switch (opt->sortMode) {
+    case SORT_BY_NAME:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByName);
+        break;
+    case SORT_BY_PID:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByPid);
+        break;
+    case SORT_UP_BY_VM_RSS:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssUp);
+        break;
+    case SORT_DOWN_BY_VM_RSS:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmRssDown);
+        break;
+    case SORT_UP_BY_VM_SIZE:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeUp);
+        break;
+    case SORT_DOWN_BY_VM_SIZE:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByVmSizeDown);
+        break;
+    case SORT_UP_BY_MEMORY_PERCENT:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentUp);
+        break;
+    case SORT_DOWN_BY_MEMORY_PERCENT:
+        qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentDown);
+        break;
+    case NOT_SORTED:
+    default:
+        break;
+    }
 }
 
 int reallocPs(procList *pl) {
