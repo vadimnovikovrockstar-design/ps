@@ -7,6 +7,7 @@
 #include <err.h>
 #include <errno.h>
 #include "ps.h"
+#include "globals.h"
 
 const char *psName = "comm";
 const char *status = "status";
@@ -17,7 +18,7 @@ int isCorrectDirectory(char *path, char *name);
 int getProcMemoryData(int pid, mem* memory);
 void getProcName(const char* pid, proc* ps);
 int reallocPs(proc** ps, int index);
-void sort(proc** ps, int length, int fl);
+void sort(proc** ps, int length);
 
 
 int getAvaliableProcs(proc **ps, int* index) {
@@ -50,14 +51,14 @@ int getAvaliableProcs(proc **ps, int* index) {
         }
         (*index)++;
 
-        if(fl & stringCount) {
-            if(strCount == *index) {
+        if(opt.flags & STRING_RESTRICTION) {
+            if(opt.limits == *index) {
                 break;
             }
         }
     }
     closedir(dir);
-    sort(ps, *index, fl);
+    sort(ps, *index);
     return 0;
 }
 

@@ -1,9 +1,26 @@
 #ifndef MY_PS_H
 #define MY_PS_H
 
-#define sortByPid 0x01
-#define sortByName 0x02
-#define stringCount 0x04
+
+enum {
+    STRING_RESTRICTION = 1 << 1
+};
+
+enum sortMode {
+    SORT_BY_NAME,
+    SORT_BY_PID,
+    SORT_UP_BY_VM_RSS,
+    SORT_DOWN_BY_VM_RSS,
+    SORT_UP_BY_VM_SIZE,
+    SORT_DOWN_BY_VM_SIZE,
+    NOT_SORTED
+};
+
+typedef struct options {
+    int flags;
+    enum sortMode sortMode;
+    long limits;   
+} options;
 
 typedef struct {
     long VmRSS;
@@ -15,10 +32,5 @@ typedef struct {
     int pid;
     mem memory;
 } proc;
-
-
-int getAvaliableProcs(proc** proc, int* count);
-int countDirs();
-
 
 #endif
