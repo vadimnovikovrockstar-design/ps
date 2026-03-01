@@ -11,19 +11,19 @@
 
 const char *psName = "comm";
 const char *status = "status";
-const char *memInfo = "meminfo";
+const char *memInfo = "/proc/meminfo";
 int fl = 0;
 long strCount = 0;
 
 int isCorrectDirectory(char *path, char *name);
 int getProcMemoryData(int pid, mem* memory);
 void getProcName(const char* pid, proc* ps);
-void getAvaliableMemoryData(proc *pl);
+int getAvailableMemory();
 int reallocPs(procList *pl);
 void sort(procList* pl, options* opt);
 
 
-int getAvaliableProcs(procList *pl, options* opt) {
+int getAvailableProcs(procList *pl, options* opt) {
     DIR *dir = opendir("/proc");
 
     if (!dir) {
@@ -32,6 +32,7 @@ int getAvaliableProcs(procList *pl, options* opt) {
 
     struct dirent *entry;
     pl->size = 0;
+    int totalMemory = getAvailableMemory();
     while ((entry = readdir(dir)) != NULL) {
         char path[512];
         snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
@@ -50,9 +51,9 @@ int getAvaliableProcs(procList *pl, options* opt) {
         res = getProcMemoryData(pl->ps[pl->size].pid, &memory);
         if(res == 0) {
             pl->ps[pl->size].memory = memory;
-        }
+        }        
+        pl->ps[pl->size].memoryPercent = totalMemory > 0 ? (memory.VmRSS * 100.) / totalMemory : 0;
 
-        getAvaliableMemoryData(&(pl->ps[pl->size]));
 
         pl->size++;
 
@@ -90,24 +91,20 @@ void getProcName(const char* pid, proc* ps) {
     fclose(psFile);
 }
 
-void getAvaliableMemoryData(proc *ps) {
-    char path[256];
-    snprintf(path, sizeof(path), "/proc/%s", memInfo);
+int getAvailableMemory() {
     char line[128];
-    long totalMemory = 0;
-    FILE* memInfoFile = fopen(path, "r");
-    if(!memInfoFile) {
-        return;         
+    long totalMemory = -1;
+    FILE* memInfoFile = fopen(memInfo, "r");
+    if(memInfoFile == NULL) {
+        return -1;
     }
     while(fgets(line, sizeof(line), memInfoFile)) {
         if(sscanf(line, "MemTotal: %ld", &totalMemory) == 1 ) {
             break;
         }
     }
-    printf("total memory: %ld %ld\n", totalMemory, ps->memory.VmRSS);
-    ps->memoryPercent = totalMemory > 0 ? (ps->memory.VmRSS * 100.) / totalMemory : 0;
-    printf("percent: %lf\n", ps->memoryPercent);
     fclose(memInfoFile);
+    return totalMemory;
 }
 
 int getProcMemoryData(int pid, mem* memory){
@@ -122,7 +119,7 @@ int getProcMemoryData(int pid, mem* memory){
     }
 
     while(fgets(line, sizeof(line), statusFile)) {
-        if(VmRSS > 0 && VmSize > 0) {
+        if(VmRSS != -1 && VmSize != -1) {
             break;
         }
         if(sscanf(line, "VmRSS: %ld", &VmRSS) == 1 ) {

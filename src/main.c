@@ -7,7 +7,7 @@
 #include "ps.h"
 #include "globals.h"
 
-int getAvaliableProcs(procList *pl, options* opt);
+int getAvailableProcs(procList *pl, options* opt);
 void sortAvailableProcs(procList* pl, options* opt);
 
 void parseArgs(int argc, char **argv, options* opt) {
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     options opt = {.sortMode = NOT_SORTED, .flags = 0, .limits = 0};
     procList psList = {.ps = NULL, .capacity = 0, .size = 0};
     parseArgs(argc, argv, &opt);
-    getAvaliableProcs(&psList, &opt);
+    getAvailableProcs(&psList, &opt);
     sortAvailableProcs(&psList, &opt);
     int outputLimit = psList.size;
     if(opt.flags & STRING_RESTRICTION) {
