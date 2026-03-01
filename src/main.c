@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include "ps.h"
 #include "globals.h"
 
@@ -11,6 +12,7 @@ int getAvailableProcs(procList *pl, options* opt);
 void sortAvailableProcs(procList* pl, options* opt);
 
 void parseArgs(int argc, char **argv, options* opt) {
+    setlocale(LC_CTYPE, "");
     int args;
 
     while ((args = getopt(argc, argv, "tTsSrRnpN:")) != -1) {

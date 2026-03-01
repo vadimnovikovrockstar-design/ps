@@ -9,7 +9,7 @@
 int cmpByName(const void *a, const void *b) {
     const proc *pa = a;
     const proc *pb = b;
-    return strcasecmp(pa->name, pb->name);
+    return strcoll(pa->name, pb->name);
 }
 
 int cmpByPid(const void *a, const void *b) {
@@ -80,7 +80,10 @@ void sort(procList* pl, options* opt) {
         case SORT_DOWN_BY_MEMORY_PERCENT:
             qsort(pl->ps, pl->size, sizeof(proc), cmpByMemoryPercentDown);
             break;
-    }
+        case NOT_SORTED:
+        default:
+            break;
+        }
 }
 
 int reallocPs(procList *pl) {
