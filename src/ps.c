@@ -18,7 +18,7 @@ long strCount = 0;
 int isCorrectDirectory(char *path, char *name);
 int getProcMemoryData(int pid, mem* memory);
 void getProcName(const char* pid, proc* ps);
-int getAvailableMemory();
+long getTotalMemory();
 int reallocPs(procList *pl);
 void sort(procList* pl, options* opt);
 
@@ -32,7 +32,7 @@ int getAvailableProcs(procList *pl, options* opt) {
 
     struct dirent *entry;
     pl->size = 0;
-    long totalMemory = getAvailableMemory();
+    long totalMemory = getTotalMemory();
     while ((entry = readdir(dir)) != NULL) {
         char path[512];
         snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
@@ -95,7 +95,7 @@ void getProcName(const char* pid, proc* ps) {
     fclose(psFile);
 }
 
-int getAvailableMemory() {
+long getTotalMemory() {
     char line[128];
     long totalMemory = -1;
     FILE* memInfoFile = fopen(memInfo, "r");
