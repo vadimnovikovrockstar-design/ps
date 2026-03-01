@@ -8,6 +8,7 @@
 #include "globals.h"
 
 int getAvaliableProcs(procList *pl, options* opt);
+void sortAvailableProcs(procList* pl, options* opt);
 
 void parseArgs(int argc, char **argv, options* opt) {
     int args;
@@ -55,8 +56,13 @@ int main(int argc, char **argv) {
     procList psList = {.ps = NULL, .capacity = 0, .size = 0};
     parseArgs(argc, argv, &opt);
     getAvaliableProcs(&psList, &opt);
+    sortAvailableProcs(&psList, &opt);
+    int outputLimit = psList.size;
+    if(opt.flags & STRING_RESTRICTION) {
+        outputLimit = opt.limits < psList.size ? opt.limits : psList.size;
+    } 
     printf("%-20s %10s %10s %10s\n", "Name", "PID", "VmRSS(KB)", "VmSize(KB)");
-    for(int i = 0; i<psList.size; ++i){
+    for(int i = 0; i<outputLimit; ++i){
         printf("%-20.20s %10d %10ld %10ld\n", psList.ps[i].name, psList.ps[i].pid, psList.ps[i].memory.VmRSS, psList.ps[i].memory.VmSize);
     }
     free(psList.ps);

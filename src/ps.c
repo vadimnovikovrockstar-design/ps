@@ -51,15 +51,21 @@ int getAvaliableProcs(procList *pl, options* opt) {
         }
         pl->size++;
 
-        if(opt->flags & STRING_RESTRICTION) {
+        if(opt->flags & STRING_RESTRICTION && opt->sortMode == NOT_SORTED) {
             if(opt->limits == pl->size) {
                 break;
             }
         }
     }
     closedir(dir);
-    sort(pl, opt);
     return 0;
+}
+
+void sortAvailableProcs(procList* pl, options* opt) {
+    if(opt->sortMode == NOT_SORTED) {
+        return;
+    }
+    sort(pl, opt);
 }
 
 void getProcName(const char* pid, proc* ps) {
