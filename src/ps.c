@@ -49,7 +49,8 @@ int getAvailableProcs(procList *pl, options* opt) {
         pl->ps[pl->size].pid = atoi(entry->d_name);
 
         mem memory = {0};
-        res = getProcMemoryData(pl->ps[pl->size].pid, &memory);
+        //TODO: handle errors from getProcMemoryData
+        getProcMemoryData(pl->ps[pl->size].pid, &memory);
         pl->ps[pl->size].memory = memory;
 
         pl->ps[pl->size].memoryPercent = totalMemory > 0 ? (memory.VmRSS * 100.) / totalMemory : 0;
