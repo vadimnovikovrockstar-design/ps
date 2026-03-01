@@ -13,6 +13,8 @@ enum sortMode {
     SORT_DOWN_BY_VM_RSS,
     SORT_UP_BY_VM_SIZE,
     SORT_DOWN_BY_VM_SIZE,
+    SORT_UP_BY_MEMORY_PERCENT,
+    SORT_DOWN_BY_MEMORY_PERCENT,
     NOT_SORTED
 };
 
@@ -28,9 +30,10 @@ typedef struct {
 } mem;
 
 typedef struct {
-    char name[256];
     int pid;
+    char name[256];
     mem memory;
+    double memoryPercent;
 } proc;
 
 typedef struct {
