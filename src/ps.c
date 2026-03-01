@@ -32,7 +32,7 @@ int getAvailableProcs(procList *pl, options* opt) {
 
     struct dirent *entry;
     pl->size = 0;
-    int totalMemory = getAvailableMemory();
+    long totalMemory = getAvailableMemory();
     while ((entry = readdir(dir)) != NULL) {
         char path[512];
         snprintf(path, sizeof(path), "/proc/%s", entry->d_name);
@@ -47,11 +47,15 @@ int getAvailableProcs(procList *pl, options* opt) {
         
         getProcName(entry->d_name, &(pl->ps[pl->size]));
         pl->ps[pl->size].pid = atoi(entry->d_name);
-        mem memory;
+        mem memory = {0};
         res = getProcMemoryData(pl->ps[pl->size].pid, &memory);
         if(res == 0) {
             pl->ps[pl->size].memory = memory;
-        }        
+        } else {
+            pl->ps[pl->size].memory.VmRSS = 0;
+            pl->ps[pl->size].memory.VmSize = 0;
+        }
+
         pl->ps[pl->size].memoryPercent = totalMemory > 0 ? (memory.VmRSS * 100.) / totalMemory : 0;
 
 
