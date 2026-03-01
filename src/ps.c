@@ -47,18 +47,13 @@ int getAvailableProcs(procList *pl, options* opt) {
         
         getProcName(entry->d_name, &(pl->ps[pl->size]));
         pl->ps[pl->size].pid = atoi(entry->d_name);
+
         mem memory = {0};
         res = getProcMemoryData(pl->ps[pl->size].pid, &memory);
-        if(res == 0) {
-            pl->ps[pl->size].memory = memory;
-        } else {
-            pl->ps[pl->size].memory.VmRSS = 0;
-            pl->ps[pl->size].memory.VmSize = 0;
-        }
+        pl->ps[pl->size].memory = memory;
 
         pl->ps[pl->size].memoryPercent = totalMemory > 0 ? (memory.VmRSS * 100.) / totalMemory : 0;
-
-
+        
         pl->size++;
 
         if((opt->flags & STRING_RESTRICTION) && opt->sortMode == NOT_SORTED) {
