@@ -142,16 +142,15 @@ int getProcMemoryData(int pid, mem* memory){
 
 
 int isCorrectDirectory(char *path, char *name) {
+    char *end;
+    strtol(name, &end, 10);
+    if(*end != '\0' || end == name) {
+        return 0;
+    }
     struct stat st;
     int res = stat(path, &st);
     if (res != 0) 
         return 0;
-    if (S_ISDIR(st.st_mode)) {
-        char *end;
-        strtol(name, &end, 10);
-        if (*end == '\0') {           
-            return 1;
-        }
-    }
-        return 0;
+
+    return S_ISDIR(st.st_mode);
 }
