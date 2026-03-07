@@ -1,5 +1,4 @@
-#ifndef MY_PS_H
-#define MY_PS_H
+#pragma once
 #include <stdint.h>
 
 enum {
@@ -89,4 +88,7 @@ typedef struct {
     int size;
 } procList;
 
-#endif
+
+
+int getAvailableProcs(procList *pl, options* opt);
+void sortAvailableProcs(procList* pl, options* opt);

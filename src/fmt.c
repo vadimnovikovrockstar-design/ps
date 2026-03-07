@@ -12,7 +12,7 @@
 void parseArgs(int argc, char **argv, options* opt) {
     int args;
 
-    while ((args = getopt(argc, argv, "asN:")) != -1) {
+    while ((args = getopt(argc, argv, "asrRvVmMN:")) != -1) {
         switch (args) {
         case 'N':
         {
@@ -36,6 +36,36 @@ void parseArgs(int argc, char **argv, options* opt) {
         case 's':
         {
             opt->sortMode = SORT_BY_NAME;
+            break;
+        }
+        case 'r':
+        {
+            opt->sortMode = SORT_UP_BY_VM_RSS;
+            break;
+        }
+        case 'R':
+        {
+            opt->sortMode = SORT_DOWN_BY_VM_RSS;
+            break;
+        }
+        case 'v':
+        {
+            opt->sortMode = SORT_UP_BY_VM_SIZE;
+            break;
+        }
+        case 'V':
+        {
+            opt->sortMode = SORT_DOWN_BY_VM_SIZE;
+            break;
+        }
+        case 'm':
+        {
+            opt->sortMode = SORT_UP_BY_MEMORY_PERCENT;
+            break;
+        }
+        case 'M':
+        {
+            opt->sortMode = SORT_DOWN_BY_MEMORY_PERCENT;
             break;
         }
         default:
@@ -63,11 +93,11 @@ static void printVsize(const proc* pl, int width) {
 }
 
 static void printMemPercent(const proc* pl, int width) {
-    printf("%*.1f", width, pl->memoryPercent);
+    printf("%*.1f%%", width-1, pl->memoryPercent);
 }
 
 static void printCpuPercent(const proc* pl, int width) {
-    printf("%*.1f", width, pl->cpuPercent);
+    printf("%*.1f%%", width-1, pl->cpuPercent);
 }
 
 static void printComm(const proc* pl, int width) {
@@ -85,7 +115,7 @@ static int digits_u64(uint64_t v) {
 
 static int digits_i64(int64_t v) {
     if (v < 0) {
-        uint64_t uv = (uint64_t)(-(v + 1)) + 1; // безопаснее для INT64_MIN
+        uint64_t uv = (uint64_t)(-(v + 1)) + 1;
         return digits_u64(uv) + 1;
     }
     return digits_u64((uint64_t)v);
@@ -109,7 +139,7 @@ static int digits_int(int v) {
     return n;
 }
 
-void computeWidth(column* cols, int numCols, const procList* pl, int limits) {
+static void computeWidth(column* cols, int numCols, const procList* pl, int limits) {
     for(int i = 0; i< limits; ++i){
         const proc* ps = &pl->ps[i];
 
@@ -142,10 +172,10 @@ void computeWidth(column* cols, int numCols, const procList* pl, int limits) {
                     if (1 > width) width = 1;
                     break;
                 case 4: // CPU%
-                    width = 5; // "100.0"
+                    width = 6;
                     break;
                 case 5: // MEM%
-                    width = 5; // "100.0"
+                    width = 6;
                     break;
                 case 6: // COMM
                     width = (int)strlen(ps->comm);
@@ -168,7 +198,7 @@ static void printHeader(const column* cols, int numCols) {
             printf(" ");
         }
         first = 0;
-        if(cols[i].aligment) {
+        if(cols[i].alignment) {
             printf("%-*s", cols[i].width, cols[i].title);
         } else {
             printf("%*s", cols[i].width, cols[i].title);
@@ -205,12 +235,10 @@ void printTable(const procList* pl, options* opt) {
            {"MEM%", (int)strlen("MEM%"), 1, 0, printMemPercent},
            {"COMM", (int)strlen("COMM"), 1, 1, printComm}
     };
-    size_t numCols = sizeof(cols) / sizeof(cols[0]);
-    int limits = 0;
+    int numCols = sizeof(cols) / sizeof(cols[0]);
+    int limits = pl->size;
     if(opt->flags & STRING_RESTRICTION) {
-        limits = opt->limits;
-    } else {
-        limits = pl->size;
+        limits = opt->limits < pl->size ? opt->limits : pl->size;
     }
     computeWidth(cols, numCols, pl, limits);
     printHeader(cols, numCols);

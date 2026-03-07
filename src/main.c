@@ -1,12 +1,7 @@
 #include <stdlib.h>
 #include <locale.h>
 #include "ps.h"
-
-int getAvailableProcs(procList *pl, options* opt);
-void sortAvailableProcs(procList* pl, options* opt);
-void printTable(const procList* pl, options* opt);
-void parseArgs(int argc, char **argv, options* opt);
-
+#include "fmt.h"
 
 int main(int argc, char **argv) {
     setlocale(LC_ALL, "");
